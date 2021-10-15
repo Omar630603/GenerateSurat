@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SuratController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,8 +15,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index']);
 
-Route::post('/surat/genrate', [SuratController::class, 'index'])->name('generateSurat');
+Route::post('suratInsert', [SuratController::class, 'store']);

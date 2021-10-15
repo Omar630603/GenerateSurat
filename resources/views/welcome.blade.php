@@ -10,69 +10,132 @@
 
         <title>{{ config('app.name', 'GenrateSurat') }}</title>
 
-        <!-- Scripts -->
-        <script src="{{ asset('js/app.js') }}" defer></script>
-
         <!-- Fonts -->
         <link rel="dns-prefetch" href="//fonts.gstatic.com">
         <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
 
+        <!-- Scripts -->
+        <script src="{{ asset('js/app.js') }}" defer></script>
+
         <!-- Styles -->
-        <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <link href="{{ asset('css/appStyle.css') }}" rel="stylesheet">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
+
+        <link rel="icon" href="{{ asset('images/appIcon.png') }}">
         <title>Generate Surat</title>
     </head>
 
     <body>
-        <div class="container">
-            <form method="post" action="" id="myForm" enctype="multipart/form-data">
-                @csrf
-                <div class="form-group">
-                    <label for="title">Title</label>
-                    <input type="text" name="title" class="form-control" id="title" aria-describedby="title">
-                </div>
+        <nav class="navbar navbar-dark bg-primary">
 
-                <div class="form-group">
-                    <label for="toWhom">To Whom</label>
-                    <input type="text" name="toWhom" class="form-control" id="toWhom" aria-describedby="toWhom">
-                </div>
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ url('/') }}">
+                    <img src="{{ asset('images/appIcon.png') }}" alt="" width="30" height="24"
+                        class="d-inline-block align-text-top">
+                    GenrateSurat
+                </a>
+            </div>
+        </nav>
+        <div class="container mt-4 lettersContainer">
 
-                <div class="form-group">
-                    <label for="body">Body</label>
-                    <textarea name="body" class="ckeditor" id="body"></textarea>
+            @if (count($letters)>0)
+            <div class="container">
+                <h2>List of all the letters created</h2>
+                <div class="list-group">
+                    @foreach ($letters as $letter)
+                    <div class="lettersList">
+                        <a href="#" class="list-group-item list-group-item-action">{{$letter->id}}- To:
+                            {{$letter->toWhom}}
+                            <div class="icons">
+                                <i data-toggle="tooltip" title="Preview" class="fas fa-eye icon" aria-hidden="true"></i>
+                                <i data-toggle="tooltip" title="Delete" class="fas fa-trash icon"
+                                    aria-hidden="true"></i>
+                            </div>
+                        </a>
+
+                    </div>
+                    @endforeach
                 </div>
-                <button type="submit" class="btn btn-dark">Generate</button>
-            </form>
+            </div>
+            @endif
+            <div class="container">
+                <h2>Create new Letter</h2>
+                <div class="card">
+                    <div class="card-header">
+                        ADD NEW LETTER
+                    </div>
+                    <div class="card-body">
+                        <form id="myForm" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="title">Title</label>
+                                <input type="text" name="title" class="form-control" id="title"
+                                    aria-describedby="title">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="toWhom">To Whom</label>
+                                <input type="text" name="toWhom" class="form-control" id="toWhom"
+                                    aria-describedby="toWhom">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="body">Body</label>
+                                <textarea name="letterBody" class="ckeditor"></textarea>
+                            </div>
+                            <hr>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-dark btn-submit">Generate</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </body>
-    <script type="text/javascript">
-        CKEDITOR.replace('ckeditor',{tabSpaces:4});
-    </script>
     <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
     <script src="http://code.jquery.com/jquery-3.3.1.min.js"
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous">
     </script>
     <script>
-        jQuery(document).ready(function(){
-            jQuery('#ajaxSubmit').click(function(e){
-               e.preventDefault();
-               $.ajaxSetup({
-                  headers: {
-                      'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
-                  }
-              });
-               jQuery.ajax({
-                  url: "{{ url('/surat/genrate') }}",
-                  method: 'post',
-                  data: {
-                     name: jQuery('#title').val(),
-                     type: jQuery('#toWhom').val(),
-                     price: jQuery('#body').val()
-                  },
-                  success: function(result){
-                     console.log(result);
-                  }});
-               });
-            });
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+    </script>
+    <script type="text/javascript">
+        $(".btn-submit").click(function(e){
+        $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+        });
+        var title = $("input[name=title]").val();
+        var toWhom = $("input[name=toWhom]").val();
+        var body = CKEDITOR.instances.letterBody.getData();
+        var url = '{{ url('suratInsert') }}';
+
+        $.ajax({
+           url:url,
+           method:'POST',
+           data:{
+                    Title:title, 
+                  ToWhom:toWhom,
+                  Body:body
+                },
+           success:function(response){
+            console.log(response)
+              if(response.success){
+                  alert(response.message) 
+              }else{
+                  alert('Error')
+              }
+           },
+           error:function(response){
+            alert(response.message)
+           }
+        });
+	});
     </script>
 
 </html>
