@@ -15,6 +15,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [HomeController::class, 'index']);
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::post('suratInsert', [SuratController::class, 'store']);
+Route::get('suratPreview/{id}', [SuratController::class, 'previewLetter'])->name('preview');
+Route::post('suratDelete', [SuratController::class, 'delete']);
+
+
+Route::get('suratPrintPDF/{id}', [SuratController::class, 'printPDF'])->name('printPDF');
+Route::get('suratEdit/{id}', [SuratController::class, 'edit'])->name('edit');
+Route::post('suratEditing', [SuratController::class, 'edting']);
+

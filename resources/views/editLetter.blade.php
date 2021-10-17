@@ -48,55 +48,35 @@
                 </ul>
             </div>
             @endif
-            @if (count($letters)>0)
+
             <div class="container">
-                <h2>List of all the letters created</h2>
-                <div class="list-group">
-                    @foreach ($letters as $letter)
-                    <div class="lettersList">
-                        <div href="#" class="list-group-item list-group-item-action">{{$letter->id}}- To:
-                            {{$letter->toWhom}}
-                            <div class="icons">
-                                <a href="{{ route('preview', ['id'=>$letter->id]) }}"><i data-toggle="tooltip"
-                                        title="Preview" class="fas fa-eye icon" aria-hidden="true"></i></a>
-                                <a onclick="deleteLetter({{$letter->id}})">
-                                    <i data-toggle="tooltip" title="Delete" class="fas fa-trash icon"
-                                        aria-hidden="true"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-            <div class="container">
-                <h2>Create new Letter</h2>
+                <h2>Edit Letter</h2>
                 <div class="card">
                     <div class="card-header">
-                        ADD NEW LETTER
+                        Edit LETTER for {{$letter->toWhom}}
                     </div>
                     <div class="card-body">
                         <form id="myForm" enctype="multipart/form-data">
                             <div class="form-group">
                                 <label for="title">Subject</label>
-                                <input type="text" name="title" class="form-control" id="title"
-                                    aria-describedby="title">
+                                <input type="text" name="title" class="form-control" id="title" aria-describedby="title"
+                                    value="{{$letter->title}}">
                             </div>
 
                             <div class="form-group">
                                 <label for="toWhom">To Whom</label>
                                 <input type="text" name="toWhom" class="form-control" id="toWhom"
-                                    aria-describedby="toWhom">
+                                    aria-describedby="toWhom" value="{{$letter->toWhom}}">
                             </div>
 
                             <div class="form-group">
                                 <label for="body">Body</label>
-                                <textarea name="letterBody" class="ckeditor"></textarea>
+                                <textarea name="letterBody" class="ckeditor">{!!$letter->body!!}</textarea>
                             </div>
                             <hr>
+                            <input type="text" name="id" id="id" hidden value="{{$letter->id}}">
                             <div class="form-group">
-                                <button type="submit" class="btn btn-dark btn-submit">Generate</button>
+                                <button type="submit" class="btn btn-dark btn-edit">Change</button>
                             </div>
                         </form>
                     </div>
@@ -114,8 +94,8 @@
         })
     </script>
     <script type="text/javascript">
-        $(".btn-submit").click(function(e){
-            // e.preventDefault();
+        $(".btn-edit").click(function(e){
+            e.preventDefault();
             $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -124,15 +104,17 @@
             var title = $("input[name=title]").val();
             var toWhom = $("input[name=toWhom]").val();
             var body = CKEDITOR.instances.letterBody.getData();
-            var url = '{{ url('suratInsert') }}';
-
+            var id = $("input[name=id]").val();
+            var url = '{{ url('suratEditing') }}';
+            console.log(id)
             $.ajax({
                 url:url,
                 method:'POST',
                 data:{
                         Title:title, 
                         ToWhom:toWhom,
-                        Body:body
+                        Body:body,
+                        id: id
                         },
                 success:function(response){
                     if(response.success){
@@ -144,31 +126,6 @@
                 }
             });
 	    });
-        function deleteLetter(id) {
-            event.preventDefault();
-            $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-            });
-            var url = '{{ url('suratDelete') }}';
-
-            $.ajax({
-                url:url,
-                method:'POST',
-                data:{
-                        id:id, 
-                        },
-                success:function(response){
-                    if(response.success){
-                        alert(response.message) 
-                    }
-                },
-                error:function(){
-                    alert('Error')
-                }
-            });
-        }
     </script>
 
 </html>
